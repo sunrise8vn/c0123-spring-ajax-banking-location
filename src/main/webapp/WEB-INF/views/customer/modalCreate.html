@@ -1,0 +1,60 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<th:block th:fragment="modalCreate">
+    <div class="modal fade" id="modalCreate" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Modal create customer</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="error-area"></div>
+                    <form class="forms-sample" method="post">
+                        <div class="row">
+                            <div class="form-group col-4">
+                                <label for="fullNameCre">Full Name</label>
+                                <input type="text" class="form-control" id="fullNameCre" name="fullNameCre"
+                                       placeholder="Enter full name">
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="emailCre">Email</label>
+                                <input type="email" class="form-control" id="emailCre" name="emailCre"
+                                       placeholder="Enter email">
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="phoneCre">Phone</label>
+                                <input type="tel" class="form-control" id="phoneCre" name="phoneCre"
+                                       placeholder="Enter phone">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="form-group col-3">
+                                <label for="provinceCre">Province</label>
+                                <select class="form-control" id="provinceCre" name="provinceCre"></select>
+                            </div>
+                            <div class="form-group col-3">
+                                <label for="districtCre">District</label>
+                                <select class="form-control" id="districtCre" name="districtCre"></select>
+                            </div>
+                            <div class="form-group col-3">
+                                <label for="wardCre">Ward</label>
+                                <select class="form-control" id="wardCre" name="wardCre"></select>
+                            </div>
+                            <div class="form-group col-3">
+                                <label for="addressCre">Address</label>
+                                <input type="text" class="form-control" id="addressCre" name="addressCre"
+                                       placeholder="Enter address">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="btnCreate" class="btn btn-outline-primary">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
