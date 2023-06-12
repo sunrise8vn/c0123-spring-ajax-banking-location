@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 
 
@@ -21,6 +22,8 @@ public class CustomerCreateReqDTO implements Validator {
     private String fullName;
     private String email;
     private String phone;
+
+    @Valid
     private LocationRegionReqDTO locationRegion;
 
     public Customer toCustomer(Long id, BigDecimal balance) {

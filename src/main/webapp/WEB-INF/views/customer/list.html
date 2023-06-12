@@ -37,6 +37,7 @@
     <th:block th:replace="/customer/modalUpdate" />
 
     <script src="/assets/jquery/jquery-3.7.0.min.js"></script>
+    <script src="/assets/jquery/jquery.validate.min.js"></script>
     <script src="/assets/bootstrap/v-5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/sweetalert2/sweetalert2.all.min.js"></script>
 
@@ -64,6 +65,7 @@
         page.elements.tblCustomerBody = $('#tblCustomer tbody')
 
         page.dialogs.elements.modalCreate = $('#modalCreate')
+        page.dialogs.elements.frmCreateCustomer = $('#frmCreateCustomer')
         page.dialogs.elements.errorCreateArea = $('#modalCreate .error-area')
         page.dialogs.elements.fullNameCre = $('#fullNameCre')
         page.dialogs.elements.emailCre = $('#emailCre')
@@ -157,6 +159,8 @@
                 url: page.url.getAllDistricts + '/' + provinceId
             })
                 .done((res) => {
+                    page.dialogs.elements.districtCre.empty();
+
                     const data = res.results
 
                     $.each(data, (index, item) => {
@@ -183,6 +187,8 @@
                 url: page.url.getAllWards + '/' + districtId
             })
                 .done((res) => {
+                    page.dialogs.elements.wardCre.empty();
+
                     const data = res.results
 
                     $.each(data, (index, item) => {
@@ -203,17 +209,29 @@
             const fullName = page.dialogs.elements.fullNameCre.val()
             const email = page.dialogs.elements.emailCre.val()
             const phone = page.dialogs.elements.phoneCre.val()
+            const provinceId = page.dialogs.elements.provinceCre.val()
+            const provinceName = page.dialogs.elements.provinceCre.find('option:selected').text()
+            const districtId = page.dialogs.elements.districtCre.val()
+            const districtName = page.dialogs.elements.districtCre.find('option:selected').text()
+            const wardId = page.dialogs.elements.wardCre.val()
+            const wardName = page.dialogs.elements.wardCre.find('option:selected').text()
             const address = page.dialogs.elements.addressCre.val()
-            const balance = 0
-            const deleted = false
+
+            const locationRegion = {
+                provinceId,
+                provinceName,
+                districtId,
+                districtName,
+                wardId,
+                wardName,
+                address
+            }
 
             const obj = {
                 fullName,
                 email,
                 phone,
-                balance,
-                address,
-                deleted
+                locationRegion
             }
 
             page.commands.doCreate(obj);
@@ -230,7 +248,8 @@
                 data: JSON.stringify(obj)
             })
                 .done((data) => {
-                    const str = page.commands.renderCustomer(data)
+                    const locationRegion = data.locationRegion
+                    const str = page.commands.renderCustomer(data, locationRegion)
                     page.elements.tblCustomerBody.prepend(str)
 
                     page.dialogs.elements.modalCreate.modal('hide')
@@ -238,16 +257,33 @@
                 .fail((jqXHR) => {
                     const responseJSON = jqXHR.responseJSON
 
-                    let str = '<ul>'
+                    let str = ''
                     $.each(responseJSON, (k, v) => {
-                        str += `<li>${v}</li>`
+                        const index = page.commands.findIndexDotInString(k)
+                        if (index !== -1) {
+                            const subKey = k.substring(index + 1, k.length)
+                            str += `<label for="${subKey}Cre">${v}</label>`
+                            $('#' + subKey + 'Cre').css('border-color', '#be0f0f')
+                        }
+                        else {
+                            str += `<label for="${k}Cre">${v}</label>`
+                        }
                     })
 
-                    str += '</ul>'
-
-
-                    page.dialogs.elements.errorCreateArea.empty().append(str);
+                    page.dialogs.elements.errorCreateArea.css('display', '')
+                    page.dialogs.elements.errorCreateArea.empty().removeClass('hide').addClass('show').append(str);
                 })
+        }
+
+        page.commands.findIndexDotInString = (str) => {
+            let index = -1;
+            for (let i = 0; i < str.length; i++) {
+                if (str.charAt(i) === '.') {
+                    index = i
+                }
+            }
+
+            return index
         }
 
         page.commands.handleAddEventShowModalUpdate = () => {
@@ -372,14 +408,74 @@
                 })
         }
 
+        page.dialogs.commands.closeModalCreate = () => {
+            page.dialogs.elements.errorCreateArea.empty().removeClass('show').addClass('hide')
+            page.dialogs.elements.frmCreateCustomer.find("input.error").removeClass("error");
+            page.dialogs.elements.frmCreateCustomer[0].reset();
+            page.dialogs.elements.frmCreateCustomer.validate().resetForm();
+        }
+
+
+        page.dialogs.elements.frmCreateCustomer.validate({
+            rules: {
+                fullNameCre: {
+                    required: true
+                },
+                emailCre: {
+                    required: true
+                }
+            },
+            messages: {
+                fullNameCre: {
+                    required: 'Họ tên là bắt buộc'
+                },
+                emailCre: {
+                    required: 'Email là bắt buộc'
+                }
+            },
+            errorLabelContainer: "#modalCreate .error-area",
+            errorPlacement: function (error, element) {
+                error.appendTo("#modalCreate .error-area");
+            },
+            showErrors: function(errorMap, errorList) {
+                if (this.numberOfInvalids() > 0) {
+                    $("#modalCreate .error-area").removeClass("hide").addClass("show");
+                } else {
+                    $("#modalCreate .error-area").removeClass("show").addClass("hide").empty();
+                    $("#frmCreateCustomer input.error").removeClass("error");
+                }
+                this.defaultShowErrors();
+            },
+            submitHandler: () => {
+                page.dialogs.commands.handleCreate();
+            }
+        })
+
 
         page.initializeControlEvent = () => {
             page.dialogs.elements.btnCreate.on('click', () => {
-                page.dialogs.commands.handleCreate();
+                page.dialogs.elements.frmCreateCustomer.trigger('submit')
             })
 
             page.dialogs.elements.btnUpdate.on('click', () => {
                 page.dialogs.commands.handleUpdate();
+            })
+
+            page.dialogs.elements.modalCreate.on('hidden.bs.modal', () => {
+                page.dialogs.commands.closeModalCreate()
+            })
+
+            page.dialogs.elements.provinceCre.on('change', function () {
+                const provinceId = $(this).val()
+                page.commands.getAllDistricts(provinceId).then(() => {
+                    const districtId = page.dialogs.elements.districtCre.val()
+                    page.commands.getAllWards(districtId)
+                });
+            })
+
+            page.dialogs.elements.districtCre.on('change', function () {
+                const districtId = $(this).val()
+                page.commands.getAllWards(districtId)
             })
         }
 

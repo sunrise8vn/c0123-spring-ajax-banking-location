@@ -1,3 +1,13 @@
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+header .navbar {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .bg-body-navbar {
     background-color: #1d91e7;
 }
@@ -12,7 +22,28 @@ h1.navbar-brand {
     color: #fff;
 }
 
+.show {
+    display: block;
+}
+
+.hide {
+    display: none;
+}
+
+
 
 .error-area {
-    color: red;
+    background-color: #ffd8d8;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.error-area.show label {
+    display: list-item;
+    color: #be0f0f;
+    margin-left: 20px;
+}
+
+input.error {
+    border-color: red;
 }

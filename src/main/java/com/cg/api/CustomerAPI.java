@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -59,13 +60,13 @@ public class CustomerAPI {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CustomerCreateReqDTO customerCreateReqDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> create(@Validated @RequestBody CustomerCreateReqDTO customerCreateReqDTO, BindingResult bindingResult) {
 
-//        new CustomerCreateReqDTO().validate(customerCreateReqDTO, bindingResult);
+        new CustomerCreateReqDTO().validate(customerCreateReqDTO, bindingResult);
 
-//        if (bindingResult.hasFieldErrors()) {
-//            return appUtils.mapErrorToResponse(bindingResult);
-//        }
+        if (bindingResult.hasFieldErrors()) {
+            return appUtils.mapErrorToResponse(bindingResult);
+        }
 
         Boolean existEmail = customerService.existsByEmail(customerCreateReqDTO.getEmail());
 
@@ -99,7 +100,6 @@ public class CustomerAPI {
 
         Optional<Customer> customerOptional = customerService.findById(customerId);
 
-
         if (!customerOptional.isPresent()) {
             throw new DataInputException("Mã khách hàng không tồn tại");
         }
@@ -115,7 +115,7 @@ public class CustomerAPI {
 
         customer.setId(updateCustomer.getId());
 
-        customerService.save(customer);
+        customerService.update(customer, updateCustomer.getLocationRegion());
 
         customer.setBalance(customerOptional.get().getBalance());
 
